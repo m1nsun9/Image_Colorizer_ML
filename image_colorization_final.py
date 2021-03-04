@@ -13,6 +13,10 @@ import os
 
 ab = np.load(os.path.join('data', 'ab1.npy'))
 gray = np.load(os.path.join('data', 'gray_scale.npy'))
+gray = gray[:10000]
+
+print(ab.shape)
+print(gray.shape)
 
 # preps grayscale images
 def batch_prep(gray_img, batch_size=100):
@@ -22,16 +26,16 @@ def batch_prep(gray_img, batch_size=100):
   for i in range(0,3):
     img[:batch_size,:,:,i] = gray_img[:batch_size]
     return img
-img_in = batch_prep(gray, batch_size=300)
+img_in = batch_prep(gray, batch_size=100)
 
-# displays gray images
+# displays gray images 
 plt.imshow(gray[29], cmap=plt.cm.gray)
 
 # displays original data channels (batch size, height, width)
-gray.shape
+# gray.shape
 
 # displays data channels post prep (batch size, height, width, depth (RGB))
-img_in.shape
+# img_in.shape
 
 # CNN model learns from grayscale and colored images
 
@@ -52,7 +56,7 @@ def get_rbg(gray_imgs, ab_imgs, n=10):
   imgs = np.array(imgs)
   return imgs
 
-img_out = get_rbg(gray_imgs=gray, ab_imgs=ab, n=300)
+img_out = get_rbg(gray_imgs=gray, ab_imgs=ab, n=100)
 
 # Conv2d helps to convert data into tensors
 # strides indicates the number of pixels that are shifted 
@@ -101,12 +105,12 @@ model.add(Dropout(0.4))
 # clipvalue clips the derivatives of the loss function and prevents gradient explosion (increased loss from each epoch) from occuring as you increase the amount of epochs
 
 # compiles the model for training
-model.compile(optimizer=tf.keras.optimizers.Adam(clipvalue=0.5), loss='mape', metrics=tf.keras.metrics.Accuracy())
+model.compile(optimizer=tf.keras.optimizers.Adam(clipvalue=0.5), loss=tf.keras.losses.CategoricalCrossentropy(), metrics=tf.keras.metrics.Accuracy())
 
 # batch_size should always be 16 for CNN models
 
 # trains the model
-model.fit(img_in, img_out, epochs=100, batch_size=16)
+model.fit(img_in, img_out, epochs=20000, batch_size=16)
 
 # uses trained model to make a prediction on our grayscale images
 prediction = model.predict(img_in)
